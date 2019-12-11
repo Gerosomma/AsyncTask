@@ -31,11 +31,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void btnProcesarOnClick(View view) {
-        //enseguida volvemos
+        new TareaProcesarMensaje().execute(mensajePredeterminado);
     }
 
     public void btnRestaurarOnClick(View view) {
         tvMensaje.setText(mensajePredeterminado);
+        pbProgreso.setProgress(0);
     }
 
     private class TareaProcesarMensaje extends AsyncTask<String, Integer, String> {
@@ -67,18 +68,25 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 mensajeProcesado.append(caracter);
+
+                publishProgress((i + 1) * 100 / longitudMensaje);
             }
-            return mensaje.toString();
+            return mensajeProcesado.toString();
         }
 
         @Override
         protected void onProgressUpdate(Integer... values) {
-            super.onProgressUpdate(values);
+            if (pbProgreso.getProgress() == 0) {
+                Log.i(MIS_LOGS, "onProgressUpdate corre en el hilo: " + Thread.currentThread().getId());
+            }
+
+            pbProgreso.setProgress(values[0]);
         }
 
         @Override
         protected void onPostExecute(String s) {
-            super.onPostExecute(s);
+            Log.i(MIS_LOGS, "onPostExecute corre en el hilo: " + Thread.currentThread().getId());
+            tvMensaje.setText(s);
         }
     }
 }
